@@ -16,7 +16,7 @@ import (
 
 // Input keeps track of your session ID so it can make requests.
 type Input struct {
-	SessionID string
+	sessionID *string
 }
 
 // NewInputFromFile makes an Input instance using the entire contents of file f
@@ -26,7 +26,9 @@ func NewInputFromFile(f string) (*Input, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Input{SessionID: strings.TrimSpace(string(b))}, nil
+
+	sid := strings.TrimSpace(string(b))
+	return &Input{sessionID: &sid}, nil
 }
 
 // Reader returns an io.ReadCloser of the input. This must be closed when done.
@@ -73,7 +75,7 @@ func (i *Input) fetch(year, day int) (io.ReadCloser, error) {
 
 	r.AddCookie(&http.Cookie{
 		Name:  "session",
-		Value: i.SessionID,
+		Value: *i.sessionID,
 	})
 
 	s, err := http.DefaultClient.Do(r)
